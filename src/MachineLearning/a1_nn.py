@@ -3,31 +3,6 @@ from functools import partial
 import matplotlib.pyplot as plt
 
 
-def softmax(x):
-    if x.shape[1] == 1:
-        exp = np.exp(x - np.max(x))
-        return exp / np.sum(exp)
-    else:
-        exp = np.exp(x-np.max(x, axis=0, keepdims=True))
-        return exp / np.sum(exp, axis=0, keepdims=True)
-
-
-def relu(x, derivative=False):
-    if derivative:
-        x[x <= 0] = 0
-        x[x > 0] = 1
-        return x
-    return np.maximum(x, 0)
-
-
-def cross_entropy(p, y, epsilon=1e-12):
-    p = np.clip(p, epsilon, 1. - epsilon)
-    m = p.shape[1]
-    loss = -np.sum(y*np.log(p))/m
-    print(f'loss:{loss}')
-    return loss
-
-
 def get_data():
     with open('../data/mnist_train.csv', 'r') as f:
         data = [x.strip().split(',') for x in f]
@@ -66,10 +41,34 @@ class SimpleNetwork:
         self.input_node = input_node
         self.output_node = output_node
 
-        self.activation_function = relu
-        self.derivative_of_activation_function = partial(relu, derivative=True)
+        self.activation_function = self.relu
+        self.derivative_of_activation_function = partial(self.relu, derivative=True)
 
         self.w, self.b = self.get_w_b()
+
+    @staticmethod
+    def softmax(x):
+        if x.shape[1] == 1:
+            exp = np.exp(x - np.max(x))
+            return exp / np.sum(exp)
+        else:
+            exp = np.exp(x - np.max(x, axis=0, keepdims=True))
+            return exp / np.sum(exp, axis=0, keepdims=True)
+
+    @staticmethod
+    def relu(x, derivative=False):
+        if derivative:
+            x[x <= 0] = 0
+            x[x > 0] = 1
+            return x
+        return np.maximum(x, 0)
+
+    @staticmethod
+    def cross_entropy(p, y, epsilon=1e-12):
+        p = np.clip(p, epsilon, 1. - epsilon)
+        m = p.shape[1]
+        ce = -np.sum(y * np.log(p)) / m
+        return ce
 
     def get_w_b(self):
         w_list = []
@@ -139,31 +138,33 @@ class SimpleNetwork:
         x = np.concatenate(self.x, axis=1)
         y = np.concatenate(self.y, axis=1)
 
-        length = len(self.w)
+        length = len(self.w) - 1
         for i, (w, b) in enumerate(zip(self.w, self.b)):
             if i == length:
-                temp = self.forward(x, w, b, softmax)
+                temp = self.forward(x, w, b, self.softmax)
             else:
                 temp = self.forward(x, w, b, self.activation_function)
             x = temp[2]
         p = x
-        loss = cross_entropy(p, y)
+        loss = self.cross_entropy(p, y)
+        print(f'loss:{loss}')
         return loss
 
     def train(self, iteration):
         # 迭代次数
-        loss = [self.calculate_loss()]
-        for n in range(1, iteration+1):
+        loss = []
+        n = 1
+        for i in range(iteration):
             # 遍历所有 batches
             for x, y in zip(self.x, self.y):
                 # 遍历所有 layers
                 # forward
                 batch_size = x.shape[1]
                 forward_data = []
-                length = len(self.w)
+                length = len(self.w) - 1
                 for i, (w, b) in enumerate(zip(self.w, self.b)):
                     if i == length:
-                        temp = self.forward(x, w, b, softmax)
+                        temp = self.forward(x, w, b, self.softmax)
                     else:
                         temp = self.forward(x, w, b, self.activation_function)
                     forward_data.append(temp)
@@ -178,6 +179,7 @@ class SimpleNetwork:
                     ai_1, z, ai, w = v
                     da = self.backward(i, n, w, da, z, ai_1, dz)
                     dz = None
+                n += 1
             loss.append(self.calculate_loss())
         return loss
 
@@ -189,7 +191,7 @@ class SimpleNetwork:
             w = self.w[i]
             b = self.b[i]
             if i+1 == len(self.w):
-                temp = self.forward(a, w, b, softmax)
+                temp = self.forward(a, w, b, self.softmax)
             else:
                 temp = self.forward(a, w, b, self.activation_function)
             a = temp[2]
@@ -209,8 +211,9 @@ class SimpleNetwork:
 
 
 if __name__ == '__main__':
-    nn = SimpleNetwork(0.02, 256, 784, 10, [300])
+    nn = SimpleNetwork(0.01, 256, 784, 10, [300])
     loss = nn.train(100)
     plt.plot(range(1, len(loss)+1), loss, linewidth=0.5)
     plt.show()
     nn.accuracy()
+
