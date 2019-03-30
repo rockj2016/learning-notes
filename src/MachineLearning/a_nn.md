@@ -634,7 +634,7 @@ $$
 
 # 优化算法
 ## batch gradient descent 
-  when the data is large (>=2000) take too match time per iteration
+  when the data is large (>=2000) take too much time per iteration
 ## stochastic gradient descent (随机梯度下降)
   the noise can be ameliorated or reduced by smaller learning rate.
   loss speed up from vectorization
