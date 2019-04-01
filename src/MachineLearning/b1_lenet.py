@@ -105,23 +105,24 @@ def conv_backword(da, cache):
 # def test_conv():
 #     np.random.seed(1)
 #     x = np.array([x for x in range(1,17)] + [x for x in range(1,17)]).reshape(1,2,4,4)
-#     w = np.ones((1, 2, 2, 2)) * 0.2
+#     w = np.ones((1, 2, 4, 4)) * 0.2
 #     b = np.ones((1, 1))
 #     print(x)
 #     print("\n")
 #
 #     a, cache_conv = conv_forward(x, w, b)
 #
-#     # print(a.shape)
-#     print("\n")
-#     testa = np.ones((1,1,3,3))
-#     print("\n")
-#     da_1, dw, db = conv_backword(testa, cache_conv)
-#     print(db)
-#     print("\n")
-#
-#     print(dw)
-#     print("\n")
+#     print(a.shape)
+#     print(a)
+    # print("\n")
+    # testa = np.ones((1,1,3,3))
+    # print("\n")
+    # da_1, dw, db = conv_backword(testa, cache_conv)
+    # print(db)
+    # print("\n")
+    #
+    # print(dw)
+    # print("\n")
 # test_conv()
 
 
@@ -245,7 +246,8 @@ def fc_backward(da, cache, dz=None):
 
 
 def get_data():
-    with open('../data/mnist_train.csv', 'r') as f:
+    # with open('../data/mnist_train.csv', 'r') as f:
+    with open('../data/mnist_test.csv', 'r') as f:
         data = [x.strip().split(',') for x in f]
         data = np.asarray(data, dtype='float').T
         # print(data[0][:10])
@@ -274,35 +276,47 @@ def get_test_data():
 
 class LeNet:
     def __init__(self,learning_rate):
-        self.batch_size = 32
-        self.w_a = np.random.randn(6, 1, 5, 5)
-        self.b_a = np.random.randn(6, 1)
+        self.batch_size = 64
+        # self.w_a = np.random.randn(6, 1, 5, 5)/10
+        # self.b_a = np.random.randn(6, 1)/10
+        self.w_a = np.random.uniform(-1/6, 1/6, (6, 1, 5, 5))
+        self.b_a = np.random.uniform(-1, 1, (6, 1))
         self.vdw_a = np.zeros(self.w_a.shape)
         self.vdb_a = np.zeros(self.b_a.shape)
 
-        self.w_c = np.random.randn(16, 6, 5, 5)
-        self.b_c = np.random.randn(16, 1)
+        # self.w_c = np.random.randn(16, 6, 5, 5)/10
+        # self.b_c = np.random.randn(16, 1)/10
+        self.w_c = np.random.uniform(-1/6, 1/6, (16, 6, 5, 5))
+        self.b_c = np.random.uniform(-1, 1,(16, 1))
         self.vdw_c = np.zeros(self.w_c.shape)
         self.vdb_c = np.zeros(self.b_c.shape)
 
-        self.w_e = np.random.randn(120, 256) * np.sqrt(2 / 256)
-        self.b_e = np.zeros((120,1))
+        # self.w_e = np.random.randn(120, 16, 4, 4)/10
+        # self.b_e = np.random.randn(120, 1)/10
+        self.w_e = np.random.uniform(-1/10, 1/10, (120, 16, 4, 4))
+        self.b_e = np.random.uniform(-1, 1,(120, 1))
         self.vdw_e = np.zeros(self.w_e.shape)
         self.vdb_e = np.zeros(self.b_e.shape)
-
-        self.w_f = np.random.randn(84, 120) * np.sqrt(2 / 120)
-        self.b_f = np.zeros((84, 1))
+        #
+        # self.w_f = np.random.randn(84, 120)
+        # self.b_f = np.zeros((84, 1))
+        self.w_f = np.random.randn(84, 120)
+        self.b_f = np.random.randn(84, 1)
         self.vdw_f = np.zeros(self.w_f.shape)
         self.vdb_f = np.zeros(self.b_f.shape)
 
-        self.w_g = np.random.randn(10, 84) * np.sqrt(2 / 84)
-        self.b_g = np.zeros((10, 1))
+        self.w_g = np.random.randn(10, 84)
+        self.b_g = np.random.randn(10, 1)
+        # self.w_g = np.random.uniform(-2.4/85, 2.4/85, (10, 84))
+        # self.b_g = np.random.uniform(-2.4/85, 2.4/85, (10, 1))
         self.vdw_g = np.zeros(self.w_g.shape)
         self.vdb_g = np.zeros(self.b_g.shape)
 
         self.x, self.y = self.get_batch_data()
         self.learning_rate = learning_rate
         self.beta = 0.9
+
+        print('learning_rate',self.learning_rate)
 
     @staticmethod
     def cross_entropy(p, y, epsilon=1e-12):
@@ -326,11 +340,45 @@ class LeNet:
             x_batches[index] = x_batches[index].T.reshape(batch_size,1,28,28)
         return x_batches,y_batches
 
+    def test(self):
+        x, y = get_test_data()
+        m = x.shape[1]
+        x = x.T
+        x = x.reshape(m,1,28,28)
+        true = 0
+        for i in range(m):
+            features = x[i].reshape(1,1,28,28)
+            label = y[i]
+            p = self.predict(features)
+            print(p)
+            p = p.tolist()
+            pn = p.index(max(p))
+            print(f'predict : {pn}, Ture: {label}')
+            print('------')
+            if pn == label:
+                true += 1
+        print(true/m *100)
+            # break
+
+    def predict(self,x):
+        batch_size = x.shape[0]
+        a_a, cache_a = conv_forward(x, self.w_a, self.b_a, padding=0, stride=1)
+        a_b, cache_b = pool_forward(a_a, 2, 2, mode='avg')
+        a_c, cache_c = conv_forward(a_b, self.w_c, self.b_c, padding=0, stride=1)
+        a_d, cache_d = pool_forward(a_c, 2, 2, mode='avg')
+        a_e, cache_e = conv_forward(a_d, self.w_e, self.b_e, padding=0, stride=1)
+        a_e_reshape = a_e.reshape(batch_size, 120).T
+        a_f, cache_f = fc_forward(a_e_reshape, self.w_f, self.b_f, 'relu')
+        a_g, cache_g = fc_forward(a_f, self.w_g, self.b_g, 'softmax')
+        return a_g
+
     def train(self,iteration):
         beta = self.beta
         for epoch in range(1,iteration+1):
-            print(epoch)
+            self.learning_rate = self.learning_rate/epoch
             for x, y in zip(self.x, self.y):
+                # print('=='*20)
+                batch_size = x.shape[0]
                 # --- forward -----
                 # layer a convolution layer
                 # input :  (batch-size, 1, 28, 28)
@@ -340,6 +388,7 @@ class LeNet:
                 # b : (6, 1)
                 # output : (batch-size, 6, 24, 24)
                 a_a, cache_a = conv_forward(x, self.w_a, self.b_a, padding=0, stride=1)
+                # print('a',np.mean(a_a))
 
                 # layer b pooling layer
                 # input : (batch-size, 6, 24, 24)
@@ -347,7 +396,7 @@ class LeNet:
                 # filter : (2,2)
                 # output : (batch-size, 6, 12, 12)
                 # pool_forward(input_data, pool_size, stride, mode='max')
-                a_b, cache_b = pool_forward(a_a, 2, 2, mode='max')
+                a_b, cache_b = pool_forward(a_a, 2, 2, mode='avg')
 
                 # layer c convolution layer
                 # input : (batch-size, 6, 12, 12)
@@ -357,32 +406,34 @@ class LeNet:
                 # b : (16, 1)
                 # output : (batch-size, 16, 8, 8)
                 a_c, cache_c = conv_forward(a_b, self.w_c, self.b_c, padding=0, stride=1)
+                # print('c',np.mean(a_c))
 
                 # layer d pooling layer
                 # input : (batch-size, 16, 8, 8)
                 # stride : 2
                 # filter : (2,2)
                 # output : (batch-size, 16, 4, 4)
-                a_d, cache_d = pool_forward(a_c, 2, 2, mode='max')
+                a_d, cache_d = pool_forward(a_c, 2, 2, mode='avg')
 
-                # reshape output (batch-size, 256)
-
-                batch_size = a_d.shape[0]
-                a_d_reshape = a_d.reshape(batch_size,256).T
-
-                # layer e fully connected layer
-                # input : (256, batch_size) # batch里面每个 sample 的所有 features 占一列
-                # w : (120,256)
-                # b : (120,1)
-                # output :(120, batch_size)
-                a_e, cache_e = fc_forward(a_d_reshape,self.w_e,self.b_e,'relu')
+                # layer e convolution layer
+                # input : (batch-size, 16, 4, 4)
+                # padding : 1
+                # stride : 1
+                # filters : (120, 16, 4, 4)
+                # b : (120, 1)
+                # output : (batch-size, 120, 1, 1)
+                # reshape to (120*batch-size)
+                a_e, cache_e = conv_forward(a_d, self.w_e, self.b_e, padding=0, stride=1)
+                a_e_reshape = a_e.reshape(batch_size,120).T
+                # print('e',np.mean(a_e))
 
                 # layer f fully connected layer
                 # input : (120, batch_size)
                 # w : (84, 120)
                 # b : (84, 1)
                 # output : (84,batch-size)
-                a_f, cache_f = fc_forward(a_e, self.w_f, self.b_f,'relu')
+                a_f, cache_f = fc_forward(a_e_reshape, self.w_f, self.b_f,'relu')
+                # print('f',np.mean(a_f))
 
                 # layer g output with softmax
                 # input : (batch-size, 84)
@@ -391,13 +442,18 @@ class LeNet:
                 # output : (batch-size, 10)
                 a_g, cache_g = fc_forward(a_f, self.w_g, self.b_g, 'softmax')
 
-                loss = self.cross_entropy(a_g,y)
+                loss = self.cross_entropy(a_g, y)
+                # print("\n")
                 print(f'loss : {loss}')
+                # print("\n")
 
                 # --- backward ---
 
                 dz_g = (a_g - y).T / batch_size
                 dw_g, db_g, da_f = fc_backward(None, cache_g, dz_g)
+
+                # print('dwg',np.abs(dw_g).mean())
+                # print('dbg',np.abs(db_g).mean())
 
                 # self.w_g -= dw_g * self.learning_rate
                 # self.b_g -= db_g * self.learning_rate
@@ -414,6 +470,8 @@ class LeNet:
                 # b : (84, 1)
                 # output : (84,batch-size)
                 dw_f, db_f, da_e = fc_backward(da_f, cache_f, None)
+                # print('dwf',np.abs(dw_f).mean())
+                # print('dbf',np.abs(db_f).mean())
 
                 # self.w_f -= dw_f * self.learning_rate
                 # self.b_f -= db_f * self.learning_rate
@@ -424,12 +482,18 @@ class LeNet:
                 self.w_f -= vdw_f * self.learning_rate
                 self.b_f -= vdb_f * self.learning_rate
 
-                # layer e fully connected layer
-                # input : (256,batch_size) # batch里面每个 sample 的所有 features 占一列
-                # w : (120,256)
-                # b : (120,1)
-                # output :
-                dw_e, db_e, da_d_reshape = fc_backward(da_e, cache_e, None)
+                # layer e convolution layer
+                # input : (batch-size, 16, 4, 4)
+                # padding : 1
+                # stride : 1
+                # filters : (120, 16, 4, 4)
+                # b : (120, 1)
+                # output : (batch-size, 120, 1, 1)
+                # reshape to (120*batch-size)
+                da_e_reshape = da_e.reshape(batch_size, 120, 1, 1)
+                da_d, dw_e, db_e = conv_backword(da_e_reshape, cache_e)
+                # print('dwe',np.abs(dw_e).mean())
+                # print('dbe',np.abs(db_e).mean())
 
                 # self.w_e -= dw_e * self.learning_rate
                 # self.b_e -= db_e * self.learning_rate
@@ -439,8 +503,6 @@ class LeNet:
                 self.vdb_e = vdb_e
                 self.w_e -= vdw_e * self.learning_rate
                 self.b_e -= vdb_e * self.learning_rate
-
-                da_d = da_d_reshape.reshape(batch_size, 16, 4, 4)
 
                 # layer d pooling layer
                 # input : (batch-size, 16, 8, 8)
@@ -457,6 +519,9 @@ class LeNet:
                 # b : (16, 1)
                 # output : (batch-size, 16, 8, 8)
                 da_b,dw_c,db_c = conv_backword(da_c,cache_c)
+
+                # print('dwc',np.abs(dw_c).mean())
+                # print('dbc',np.abs(db_c).mean())
 
                 # self.w_c -= dw_c * self.learning_rate
                 # self.b_c -= db_c * self.learning_rate
@@ -485,6 +550,10 @@ class LeNet:
                 da_x, dw_a, db_a = conv_backword(da_a, cache_a)
                 # self.w_a -= dw_a * self.learning_rate
                 # self.b_a -= db_a * self.learning_rate
+
+                # print('dwa',np.abs(dw_a).mean())
+                # print('dba',np.abs(db_a).mean())
+                # print(dw_a)
                 vdw_a = beta * self.vdw_a + (1 - beta) * dw_a
                 vdb_a = beta * self.vdb_a + (1 - beta) * db_a
                 self.vdw_a = vdw_a
@@ -492,9 +561,12 @@ class LeNet:
                 self.w_a -= vdw_a * self.learning_rate
                 self.b_a -= vdb_a * self.learning_rate
 
+                # return
+
 
 if __name__ == '__main__':
-    net = LeNet(0.0005)
-    net.train(10)
+    net = LeNet(0.0001)
+    net.train(5)
+    net.test()
 
 
