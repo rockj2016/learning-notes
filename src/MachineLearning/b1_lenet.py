@@ -246,8 +246,8 @@ def fc_backward(da, cache, dz=None):
 
 
 def get_data():
-    # with open('../data/mnist_train.csv', 'r') as f:
-    with open('../data/mnist_test.csv', 'r') as f:
+    with open('../data/mnist_train.csv', 'r') as f:
+    # with open('../data/mnist_test.csv', 'r') as f:
         data = [x.strip().split(',') for x in f]
         data = np.asarray(data, dtype='float').T
         # print(data[0][:10])
@@ -375,6 +375,7 @@ class LeNet:
     def train(self,iteration):
         beta = self.beta
         for epoch in range(1,iteration+1):
+            print('-'*50,epoch)
             self.learning_rate = self.learning_rate/epoch
             for x, y in zip(self.x, self.y):
                 # print('=='*20)
