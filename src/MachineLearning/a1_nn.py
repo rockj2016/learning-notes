@@ -124,6 +124,7 @@ class SimpleNetwork:
         :param dz: dzi 如传入dzi则函数内不再根据da,z计算dzi
         :return: dai-1 用于前一层求导计算
         """
+
         if dz is None:
             dz = da * self.derivative_of_activation_function(z).T
         dw = np.dot(dz.T, ai_1.T)

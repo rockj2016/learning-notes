@@ -41,7 +41,7 @@ transform = transforms.Compose([
 ])
 
 train_set = Mnist('../../data/mnist_train.csv', transform)
-train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
 
 test_set = Mnist('../../data/mnist_test.csv', transform)
 test_loader = DataLoader(test_set, batch_size=256)
@@ -51,7 +51,7 @@ class LeNet(nn.Module):
     def __init__(self):
         super(LeNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
-        self.pool = nn.AvgPool2d(2, 2)
+        self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.conv3 = nn.Conv2d(16, 120, 5)
         self.fc1 = nn.Linear(120, 84)
@@ -110,7 +110,8 @@ def test():
         res = net(data[0])
         label = data[1]
         correct += label.eq(res.max(1)[1]).sum()
-    print(f"{'%.5f' % (correct/100)}%")
+    print(correct)
+    print(f"{'%.3f' % (correct.item()/100)}%")
 
 
 train(10)
