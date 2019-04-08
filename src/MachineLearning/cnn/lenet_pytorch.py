@@ -8,31 +8,7 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
-
-
-class Mnist(Dataset):
-    def __init__(self, csv_file, transform=None):
-        self.data = pd.read_csv(csv_file,header=None)
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        sample = self.data.iloc[[idx]].values
-        label = sample[0][0]
-        sample = np.delete(sample, 0).reshape(28, 28)
-        sample = sample.astype(np.uint8)
-        img = Image.fromarray(sample, mode='L')
-        if self.transform:
-            img = self.transform(img)
-
-        # # check
-        # plt.imshow(sample, cmap='Greys')
-        # plt.show()
-
-        return img, label
-
+from dataset import Mnist
 
 transform = transforms.Compose([
     transforms.Resize((32, 32)),
