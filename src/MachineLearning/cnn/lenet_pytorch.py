@@ -37,7 +37,7 @@ class Mnist(Dataset):
 transform = transforms.Compose([
     transforms.Resize((32, 32)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0], std=[1]),
+    transforms.Normalize(mean=[0.1307], std=[0.3081]),
 ])
 
 train_set = Mnist('../../data/mnist_train.csv', transform)
@@ -56,7 +56,6 @@ class LeNet(nn.Module):
         self.conv3 = nn.Conv2d(16, 120, 5)
         self.fc1 = nn.Linear(120, 84)
         self.fc2 = nn.Linear(84, 10)
-        self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -66,7 +65,7 @@ class LeNet(nn.Module):
         x = x.view(-1, 120)
 
         x = F.relu(self.fc1(x))
-        x = self.softmax(self.fc2(x))
+        x = self.fc2(x)
         return x
 
 
@@ -84,7 +83,6 @@ def train(n):
             samples = data[0]
             labels = data[1]
             res = net(samples)
-
             loss = criterion(res, labels)
             # print('%.3f' % loss.item())
 

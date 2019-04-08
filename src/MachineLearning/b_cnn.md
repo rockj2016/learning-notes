@@ -33,7 +33,7 @@ $$
 
 ---
 
-## pooling
+## pooling layer
 
 $$
 \begin{aligned}
@@ -47,3 +47,10 @@ $$
 
 \end{aligned}
 $$
+
+## fully connected layer
+
+## why convolution
+
+1. Parameter sharing : a feature decetor(filter) that's useful in one part of the image is probably useful in another part of image
+2. Sparsity of connections : in each layer, each output value depends only on a small number of inputs
