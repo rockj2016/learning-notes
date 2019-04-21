@@ -1,4 +1,4 @@
-from a1_nn import SimpleNetwork
+from nn import SimpleNetwork
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,13 +46,13 @@ class AdamNn(SimpleNetwork):
         sdw = beta_2 * sdw + (1 - beta_2) * dw ** 2
         sdb = beta_2 * sdb + (1 - beta_2) * db ** 2
 
-        sdw = sdw / (1 + beta_2 ** n)
-        sdb = sdb / (1 + beta_2 ** n)
-        vdw = vdw / (1 + beta_1 ** n)
-        vdb = vdb / (1 + beta_1 ** n)
+        sdw_ = sdw / (1 + beta_2 ** n)
+        sdb_ = sdb / (1 + beta_2 ** n)
+        vdw_ = vdw / (1 + beta_1 ** n)
+        vdb_ = vdb / (1 + beta_1 ** n)
 
-        self.w[index] -= self.learning_rate * vdw / (np.sqrt(sdw) + self.esp)
-        self.b[index] -= self.learning_rate * vdb / (np.sqrt(sdb) + self.esp)
+        self.w[index] -= self.learning_rate * vdw_ / (np.sqrt(sdw_) + self.esp)
+        self.b[index] -= self.learning_rate * vdb_ / (np.sqrt(sdb_) + self.esp)
         self.sdw[index] = sdw
         self.sdb[index] = sdb
         self.vdw[index] = vdw
@@ -64,7 +64,7 @@ class AdamNn(SimpleNetwork):
 
 if __name__ == '__main__':
     nn = AdamNn(0.001, 256, 784, 10, [300])
-    loss = nn.train(100)
+    loss = nn.train(10)
     plt.plot(range(1, len(loss)+1), loss, linewidth=0.5)
     plt.show()
     nn.accuracy()
