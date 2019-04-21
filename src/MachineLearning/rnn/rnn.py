@@ -1,5 +1,6 @@
 import numpy as np
 import math, copy
+import matplotlib.pyplot as plt
 
 
 def softmax(x):
@@ -28,9 +29,11 @@ class NetWork:
         print(len(self.data))
 
     def get_data(self):
-        with open('../data/text.txt', 'r', encoding='utf-8') as f:
+        # with open('../data/text.txt', 'r', encoding='utf-8') as f:
+        with open('../data/input.txt', 'r', encoding='utf-8') as f:
             data = f.read()
-            return data[0:int(len(data)/150)]
+            return data
+            # return data[0:int(len(data)/150)]
 
     def init_parameters(self):
         wxh = np.random.randn(self.hidden_size,self.feature_size) * 0.001
@@ -47,6 +50,7 @@ class NetWork:
         }
 
     def train(self, iteration):
+        loss_list = []
         smooth_loss = -np.log(1.0 / self.feature_size) * self.truncation_size
 
         times = 1
@@ -71,14 +75,18 @@ class NetWork:
                 self.update_parameters(d_dict, times)
                 times += 1
 
-                print(loss)
                 smooth_loss = smooth_loss * 0.999 + loss * 0.001
 
                 i += self.truncation_size
 
+            loss_list.append(smooth_loss[0])
+            print(smooth_loss)
             print(self.sample(1,200))
             print('--'*20)
-            # print('\n')
+            print('\n')
+
+        plt.plot(range(1, len(loss_list) + 1), loss_list, linewidth=0.5)
+        plt.show()
 
     def update_parameters(self, d, n):
 
@@ -90,8 +98,6 @@ class NetWork:
         # for k, v in d.items():
         #     self.parameters[k] -= v * learning_rate
 
-            #
-        # print(np.mean(self.parameters['whh']))
         for k, v in d.items():
             vd = self.dv[k]
             sd = self.ds[k]
@@ -102,17 +108,9 @@ class NetWork:
             vd_ = vd / (1 - beta_1 ** n)
             sd_ = sd / (1 - beta_2 ** n)
 
-            # print(k,np.mean(learning_rate * vd / (np.sqrt(sd) + esp)))
-
             self.parameters[k] -= learning_rate * vd_ / (np.sqrt(sd_) + esp)
             self.ds[k] = sd
             self.dv[k] = vd
-
-        # print(np.mean(self.parameters['whh']))
-        # print('-'*30)
-
-        import time
-        time.sleep(10)
 
     def forward(self, data, h_prev, labels):
         hs = []
@@ -186,7 +184,7 @@ class NetWork:
             )
             y = np.dot(self.parameters['why'], h) + self.parameters['by']
             p = softmax(y)
-
+            # ix = np.argmax(p)
             ix = np.random.choice(range(self.feature_size), p=p.ravel())
             x = np.zeros((self.feature_size, 1))
             x[ix] = 1
@@ -194,7 +192,5 @@ class NetWork:
         return ''.join([self.index_feature_dict[x] for x in xs])
 
 
-
-
-n = NetWork(1024, 32)
-n.train(100)
+n = NetWork(100, 32)
+n.train(1000)
