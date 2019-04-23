@@ -695,10 +695,10 @@ $$
 & S_{dw} = \beta_{2} S_{dw} + (1 - \beta_{2}){dw}^{2} \text{ (element-wise square)} \\\\
 & S_{db} = \beta_{2} S_{db} + (1 - \beta_{2}){db}^{2} \\\\
 
-& V_{dw}^{c} = \frac{V_{dw}}{1 - \beta_{1}^{2}}\\\\
-& V_{db}^{c} = \frac{V_{db}}{1 - \beta_{1}^{2}}\\\\
-& S_{dw}^{c} = \frac{S_{dw}}{1 - \beta_{2}^{2}}\\\\
-& S_{db}^{c} = \frac{S_{db}}{1 - \beta_{2}^{2}}\\\\
+& V_{dw}^{c} = \frac{V_{dw}}{1 - \beta_{1}^{n}}\\\\
+& V_{db}^{c} = \frac{V_{db}}{1 - \beta_{1}^{n}}\\\\
+& S_{dw}^{c} = \frac{S_{dw}}{1 - \beta_{2}^{n}}\\\\
+& S_{db}^{c} = \frac{S_{db}}{1 - \beta_{2}^{n}}\\\\
 
 & W = W - \alpha \frac{V_{dw}^{c}}{\sqrt{S_{dw}^{c}} + \epsilon} \quad (\epsilon = 10^{-8})\\\\
 & b = b - \alpha \frac{V_{db}^{c}}{\sqrt{S_{db}^{c}} + \epsilon} \\\\
