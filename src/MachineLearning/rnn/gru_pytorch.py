@@ -63,7 +63,7 @@ class RnnGru(nn.Module):
         return h,output
 
 
-net = RnnGru(65,100)
+net = RnnGru(65,200)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=5e-4)
 
@@ -78,7 +78,7 @@ def train(iteration):
         for datas, labels in train_loader:
             loss = 0
             optimizer.zero_grad()
-            h_prev = torch.zeros((1, 100))
+            h_prev = torch.zeros((1, 200))
             for x, y in zip(datas[0], labels[0]):
                 h_prev,res = net(x, h_prev)
                 loss += criterion(res, y.reshape(1))
@@ -95,7 +95,7 @@ def train(iteration):
 
 
 def sample(n):
-    h = torch.zeros(1,100)
+    h = torch.zeros(1,200)
     x = torch.zeros(1,65)
     index = int(random.random()*65)
     x[0][index] = 1
