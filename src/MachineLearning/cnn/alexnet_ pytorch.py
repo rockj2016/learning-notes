@@ -1,12 +1,13 @@
 import pickle
 import numpy as np
-from torch.utils.data import Dataset,DataLoader
+from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import matplotlib.pyplot as plt
 from torchvision import transforms
 import torch.nn as nn
 from torch import optim
 from dataset import Cifar10
+
 
 class AlexNet(nn.Module):
     """
@@ -129,19 +130,21 @@ net = AlexNet()
 net.apply(weight_init)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=1e-4)
+optimizer = optim.Adam(net.parameters(), lr=5e-4)
 
 
 def train(n):
     loss_list = []
     for epoch in range(1, n+1):
         running_loss = 0
-        for i,data in enumerate(train_loader):
+        for i, data in enumerate(train_loader):
             optimizer.zero_grad()
             samples = data[0]
-
             labels = data[1].long()
+            print(samples.size())
             res = net(samples)
+            print(res.size())
+            print(labels.size())
             loss = criterion(res, labels)
             # print('%.3f' % loss.item())
 
@@ -159,6 +162,7 @@ def train(n):
     loss_list = [float(x) for x in loss_list]
     plt.plot(range(1, len(loss_list) + 1), loss_list, linewidth=0.5)
     plt.show()
+
 
 def test():
     correct = 0

@@ -69,8 +69,10 @@ class Cifar10(Dataset):
         c2 = np.array(c2)/255
         c3 = np.array(c3)/255
         mean = c1.mean(), c2.mean(), c3.mean()
-        std = c1.std(), c2.std(), c3.std()
+        std = c1.std(), c2.std(), c3.std\
+            ()
         return mean,std
+
 
 class Mnist(Dataset):
     def __init__(self, csv_file, transform=None):

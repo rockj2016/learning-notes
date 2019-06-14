@@ -1,4 +1,4 @@
-from a1_nn import SimpleNetwork
+from .nn import SimpleNetwork
 import numpy as np
 import matplotlib.pyplot as plt
 

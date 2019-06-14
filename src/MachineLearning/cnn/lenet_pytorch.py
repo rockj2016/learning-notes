@@ -59,6 +59,7 @@ def train(n):
             samples = data[0]
             labels = data[1]
             res = net(samples)
+            print(res)
             loss = criterion(res, labels)
             # print('%.3f' % loss.item())
 

@@ -94,20 +94,6 @@ def train(iteration):
     plt.show()
 
 
-def sample(n):
-    h = torch.zeros(1,200)
-    x = torch.zeros(1,65)
-    index = int(random.random()*65)
-    x[0][index] = 1
-    prediction = [index]
-    for i in range(n):
-        h,res = net(x,h)
-        p = res.topk(1)[1].item()
-        prediction.append(p)
-        x = torch.zeros(1, 65)
-        x[0][p]=1
-    text = ''.join([texts.index_to_word[i] for i in prediction])
-    print(text)
 
 
 train(10)
