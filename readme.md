@@ -1,1 +1,7 @@
-平时看过,用过,的一些东西,时间长了很容易忘记,尝试通过记录增加印象,或者以后看的时候效率高些
+Learning note about
+
+- Python
+- Django
+- Deep learning
+- Machine learning
+  ~~~~~~~~
