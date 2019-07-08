@@ -67,3 +67,41 @@ def view(request):
         # inside transactions
         pass
 ```
+
+## 7. save point
+
+> savepoint 是一个可以让你回滚部分事务的标记,支持sqlite, postgresql,oracle,mysql
+> 一但你使用atomic()开启了事务,一系列的数据库操作一同执行或回滚,savepoints提供了良好的回滚组织,而不是像transaction.roolback()所有操作一同回滚
+> 当atomic()嵌套,会创建一个savepoint允许部分提交或回滚
+
+> savepoint通过django.db.transaction 中的三个函数控制
+>
+> > savepoint(using=None): 创建savepoint ,return savepoint ID
+>
+> > avepoint_commit(sid,using=None): 释放一个sid 保留改动
+> 
+> > savepoint_rollback(sid,using=None): 回滚
+
+```python
+with transaction.atomic():  # Outer atomic, start a new transaction
+    transaction.on_commit(foo)
+
+    with transaction.atomic():  # Inner atomic block, create a savepoint
+        transaction.on_commit(bar)
+
+# foo() and then bar() will be called when leaving the outermost block
+
+#====================================
+
+with transaction.atomic():  # Outer atomic, start a new transaction
+    transaction.on_commit(foo)
+
+    try:
+        with transaction.atomic():  # Inner atomic block, create a savepoint
+            transaction.on_commit(bar)
+            raise SomeError()  # Raising an exception - abort the savepoint
+    except SomeError:
+        pass
+
+# foo() will be called, but not bar()
+```
